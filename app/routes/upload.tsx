@@ -1,45 +1,131 @@
 import React, { type FormEvent } from 'react';
 import FileUploader from '~/components/FileUploader';
 import Navbar from '~/components/Navbar';
+import { usePuterStore } from '~/lib/puter';
+import { useNavigate } from 'react-router';
+import { convertPdfToImage } from '~/lib/pdfToImage';
+import { generateUUID } from 'utilities/format-size';
+import { AIResponseFormat, prepareInstructions } from 'utilities/data';
 
 const upload = () => {
+  const { auth, isLoading, fs, ai, kv } = usePuterStore();
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [statusText, setStatusText] = React.useState('');
-  const [file, setFile] = React.useState<File | null>(null);
-  const onFileSelect = (file: File | null) => {
-    setFile(file);
+  const [files, setFiles] = React.useState<File[]>([]);
+
+  const handleAnalyze = async ({
+    file,
+    companyName,
+    jobTitle,
+    jobDescription,
+  }: {
+    file: File;
+    companyName: string;
+    jobTitle: string;
+    jobDescription: string;
+  }) => {
+    try {
+      setIsProcessing(true);
+      setStatusText('Uploading file...');
+
+      // Ensure file is valid before uploading
+      if (!file || !(file instanceof File)) {
+        throw new Error('Invalid file');
+      }
+
+      const uploadedFile = await fs.upload([file]);
+
+      if (!uploadedFile) {
+        throw new Error('Failed to upload file');
+      }
+
+      // Skip image conversion - Puter AI can handle PDFs directly
+      setStatusText('Processing PDF...');
+
+      setStatusText('Preparing data...');
+      const uuid = generateUUID();
+
+      const data = {
+        id: uuid,
+        file: uploadedFile.path,
+        imagePath: uploadedFile.path, // Use PDF path directly
+        companyName,
+        jobTitle,
+        jobDescription,
+        feedback: {},
+      };
+
+      setStatusText('Saving data...');
+      const saveData = await kv.set(`resume-${uuid}`, JSON.stringify(data));
+      if (!saveData) {
+        throw new Error('Failed to save data');
+      }
+
+      setStatusText('Analyzing your resume...');
+
+      const feedback = await ai.feedback(
+        uploadedFile.path, // Use PDF path directly
+        prepareInstructions({
+          jobTitle,
+          jobDescription,
+          AIResponseFormat,
+        })
+      );
+      if (!feedback) {
+        throw new Error('Failed to analyze resume');
+      }
+      console.log(feedback);
+
+      const feedbackText =
+        typeof feedback.message.content === 'string'
+          ? feedback.message.content
+          : feedback.message.content[0].text;
+
+      data.feedback = JSON.parse(feedbackText);
+      await kv.set(`resume-${uuid}`, JSON.stringify(data));
+      setIsProcessing(false);
+
+      setStatusText('Analysis complete! Check your results.');
+      console.log('Analysis complete! Check your results.', data);
+      // navigate('/results');
+    } catch (error) {
+      console.error('Error during analysis:', error);
+      setIsProcessing(false);
+      setStatusText(
+        error instanceof Error ? error.message : 'An error occurred'
+      );
+    }
   };
 
-  //   const handleUpload = (event: React.FormEvent<HTMLFormElement>) => {
-  //     event.preventDefault();
-  //     setIsProcessing(true);
-  //     setStatusText('Processing...');
-  //   };
-
-  const handleFileSelect = (file: File | null) => {
-    setFile(file);
-    onFileSelect(file);
+  const handleFileSelect = (selectedFiles: File[]) => {
+    setFiles(selectedFiles);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = e.currentTarget.closest('form');
-    if (!form) return;
-
+    const form = e.currentTarget;
     const formData = new FormData(form);
-    if (!formData) return;
 
-    if (!file) {
+    if (!files || files.length === 0) {
       alert('Please select a file to upload.');
       return;
     }
-    formData.append('file', file as File);
-    const companyName = formData.get('company-name');
-    const jobTitle = formData.get('job-title');
-    const jobDescription = formData.get('job-description');
+
+    const file = files[0];
+    const companyName = formData.get('company-name') as string;
+    const jobTitle = formData.get('job-title') as string;
+    const jobDescription = formData.get('job-description') as string;
 
     console.log({ file, companyName, jobTitle, jobDescription });
+
+    await handleAnalyze({
+      file,
+      companyName,
+      jobTitle,
+      jobDescription,
+    });
   };
 
   return (
@@ -53,9 +139,11 @@ const upload = () => {
           {isProcessing ? (
             <>
               <p className="text-lg mb-6 py-3">{statusText}</p>
-              <picture>
-                <img src="/loading.svg" alt="loading" />
-              </picture>
+              <img
+                src="/assets/images/bouncing-circles.svg"
+                alt="loading"
+                className="w-24 h-24"
+              />
             </>
           ) : (
             <p className="text-lg mb-6 py-3">
