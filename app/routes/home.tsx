@@ -1,6 +1,9 @@
-import { resumes } from 'constants';
+import { resumes } from 'utilities/data';
 import type { Route } from './+types/home';
 import Navbar from '~/components/Navbar';
+import { usePuterStore } from '~/lib/puter';
+import { useLocation, useNavigate } from 'react-router';
+import { useEffect } from 'react';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,6 +13,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const { auth } = usePuterStore();
+  const location = useLocation();
+  const next = location.search ? location.search.split('=')[1] : '/home';
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth.isAuthenticated) navigate('/auth?next=/');
+  }, [auth.isAuthenticated, next]);
+
   return (
     <main>
       <Navbar />

@@ -23,5 +23,16 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".cache",
+    ".next",
+    "out",
+    "coverage",
+    "public",
+    "app/routes.ts"
+  ]
 }
