@@ -34,7 +34,7 @@ export default function Home() {
       </section>
 
       {/* map over resume reviews generated */}
-      <section className="reviews-section">
+      <section className="resume-section">
         <h2 className="text-2xl font-semibold mb-4">Recent Reviews</h2>
 
         <div className="reviews-list">
