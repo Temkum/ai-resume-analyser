@@ -104,7 +104,9 @@ export default function Home() {
 
       {/* Resume reviews section */}
       <section className="resume-section p-6">
-        <h2 className="text-2xl font-semibold mb-6">Your Resume Reviews</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-center">
+          Your Resume Reviews
+        </h2>
 
         {loadingResumes ? (
           <div className="flex justify-center items-center h-32">
@@ -117,7 +119,7 @@ export default function Home() {
             </p>
             <button
               onClick={() => navigate('/upload')}
-              className="primary-button"
+              className="primary-button w-70"
             >
               Upload Your First Resume
             </button>
@@ -159,8 +161,13 @@ export default function Home() {
                       href={resume.file}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="primary-button text-center"
+                      className="primary-button text-center flex justify-center "
                     >
+                      <img
+                        src="/images/pdf.svg"
+                        alt="pdf-icon"
+                        className="w-6 h-6 mr-3"
+                      />
                       View PDF
                     </a>
                   )}

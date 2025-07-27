@@ -148,18 +148,19 @@ const Resume = () => {
           <span>Back to Home</span>
         </Link>
       </nav>
-      <div className="flex flex-row w-full max-lg:flex-col gap-4">
-        <section className="feedback-section bg-[url('/images/bg-small.svg')] bg-cover h-[100vh] sticky top-0 items-center justify-center">
+      <div className="flex flex-col-reverse lg:flex-row w-full gap-4">
+        {/* PDF Viewer Section */}
+        <section className="feedback-section bg-[url('/images/bg-small.svg')] bg-cover h-[100vh] sticky top-0 items-center justify-center flex-1">
           {dataLoading || !pdfUrl ? (
             <div className="flex items-center justify-center">
               <img
-                src="/assets/images/bouncing-circles.svg"
+                src="/images/bouncing-circles.svg"
                 alt="loading"
                 className="w-20 h-20"
               />
             </div>
           ) : (
-            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4">
+            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[80vh] w-full max-w-[800px] bg-white rounded-2xl p-4">
               <iframe
                 src={pdfUrl}
                 title="Resume PDF"
@@ -169,19 +170,23 @@ const Resume = () => {
             </div>
           )}
         </section>
-        <section className="feedback-section">
+
+        {/* Resume Review Section */}
+        <section className="feedback-section flex-1">
           <h2 className="text-3xl font-semibold text-center">Resume Review</h2>
           {dataLoading || !feedback ? (
             <div className="flex items-center justify-center">
               <img
-                src="/assets/images/bouncing-circles.svg"
+                src="/images/bouncing-circles.svg"
                 alt="loading"
                 className="w-20 h-20"
               />
             </div>
           ) : (
-            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4 overflow-y-auto">
-              <Summary feedback={feedback} />
+            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[80vh] w-full max-w-[900px] bg-white rounded-2xl p-4 overflow-y-auto">
+              <div className="mb-4">
+                <Summary feedback={feedback} />
+              </div>
               <ATS
                 score={feedback.ATS.score || 0}
                 suggestions={feedback.ATS.tips || []}

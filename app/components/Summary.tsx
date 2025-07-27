@@ -28,10 +28,9 @@ const Category = ({ title, score }: { title: string; score: number }) => {
 const Summary = ({ feedback }: { feedback: Feedback }) => {
   return (
     <div className="bg-white rounded-2xl p-4 shadow-md animate-in fade-in duration-500">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-semibold">Summary</h2>
-        <ScoreGuage score={feedback.overallScore} />
-        <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-semibold mb-3.5">Summary</h2>
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold">Overall Score</h3>
             <p className="text-lg font-semibold">
@@ -39,6 +38,7 @@ const Summary = ({ feedback }: { feedback: Feedback }) => {
             </p>
           </div>
         </div>
+        <ScoreGuage score={feedback.overallScore} />
       </div>
 
       <Category title="ATS" score={feedback.ATS.score} />
