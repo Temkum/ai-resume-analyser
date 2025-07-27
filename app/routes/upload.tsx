@@ -137,7 +137,7 @@ const upload = () => {
             <>
               <p className="text-lg mb-6 py-3">{statusText}</p>
               <img
-                src="/assets/images/bouncing-circles.svg"
+                src="/images/bouncing-circles.svg"
                 alt="loading"
                 className="w-24 h-24"
               />

@@ -68,6 +68,19 @@ export default function Home() {
     loadResumes();
   }, [auth.isAuthenticated, kv]);
 
+  const handleViewPdf = async (filePath: string) => {
+    try {
+      const blob = await window.puter.fs.read(filePath);
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+
+      // Revoke after short delay
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (error) {
+      console.error('Failed to open PDF:', error);
+    }
+  };
+
   // Show loading state while checking auth
   if (isLoading) {
     return (
@@ -157,11 +170,9 @@ export default function Home() {
                     View Analysis
                   </button>
                   {resume.file && (
-                    <a
-                      href={resume.file}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="primary-button text-center flex justify-center "
+                    <button
+                      onClick={() => handleViewPdf(resume.file)}
+                      className="secondary-button text-center flex justify-center"
                     >
                       <img
                         src="/images/pdf.svg"
@@ -169,7 +180,7 @@ export default function Home() {
                         className="w-6 h-6 mr-3"
                       />
                       View PDF
-                    </a>
+                    </button>
                   )}
                 </div>
               </div>

@@ -4,10 +4,10 @@ import { useDropzone } from 'react-dropzone';
 import { formatSize } from 'utilities/format-size';
 
 // Import your SVG files
-import PdfIcon from '../../public/assets/images/pdf.svg';
-import DocxIcon from '../../public/assets/images/docx.svg';
-import DocIcon from '../../public/assets/images/doc.svg';
-import TxtIcon from '../../public/assets/images/txt.svg';
+import PdfIcon from '/images/pdf.svg';
+import DocxIcon from '/images/docx.svg';
+import DocIcon from '/images/doc.svg';
+import TxtIcon from '/images/txt.svg';
 
 interface FileUploaderProps {
   onFileSelect: (files: File[]) => void;
