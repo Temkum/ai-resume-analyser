@@ -20,10 +20,10 @@ const Resume = () => {
   const { id } = useParams();
   const { kv, fs, auth, isLoading } = usePuterStore();
 
-  const resume = kv.get(`resume:${id}`);
-  const [imageUrl, setImageUrl] = useState('');
-  const [resumeUrl, setResumeUrl] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [resumeData, setResumeData] = useState<any>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,44 +32,113 @@ const Resume = () => {
     }
   }, [auth.isAuthenticated, isLoading, navigate, id]);
 
+  // Load resume data from KV store once
   useEffect(() => {
-    const loadResume = async () => {
-      if (!auth.isAuthenticated) return;
-      if (!resume) return;
-      const data = await resume;
-      if (!data) return;
+    const loadResumeData = async () => {
+      if (!auth.isAuthenticated || !id) return;
 
-      const parsedData = JSON.parse(data);
+      try {
+        setDataLoading(true);
+        const key = `resume-${id}`;
+        console.log('Fetching resume data for key:', key);
 
-      const resumeBlob = await fs.read(parsedData.resumePath);
-      if (!resumeBlob) return;
+        const data = await kv.get(key);
+        console.log('Resume data retrieved:', data);
 
-      const pdfBlob = new Blob([resumeBlob], { type: 'application/pdf' });
-      const pdfUrl = URL.createObjectURL(pdfBlob);
+        if (!data) {
+          console.error('No resume data found for id:', id);
+          setDataLoading(false);
+          return;
+        }
 
-      const resumeUrl = URL.createObjectURL(resumeBlob);
-
-      const feedbackBlob = await fs.read(parsedData.feedbackPath);
-      if (!feedbackBlob) return;
-      const feedbackUrl = URL.createObjectURL(feedbackBlob);
-
-      const feedback = await fs.read(parsedData.feedbackPath);
-      if (!feedback) return;
-      const feedbackText = await feedback.text();
-      const feedbackData = JSON.parse(feedbackText);
-
-      const imageBlob = await fs.read(parsedData.imagePath);
-      if (!imageBlob) return;
-      const imageUrl = URL.createObjectURL(imageBlob);
-
-      setResumeUrl(resumeUrl);
-      setFeedback(feedbackData);
-      setImageUrl(imageUrl);
-
-      console.log(imageUrl, resumeUrl, pdfUrl, feedbackUrl);
+        const parsedData = JSON.parse(data);
+        setResumeData(parsedData);
+        setDataLoading(false);
+      } catch (error) {
+        console.error('Error loading resume data:', error);
+        setDataLoading(false);
+      }
     };
-    loadResume();
-  }, [resume, auth.isAuthenticated, isLoading, id]);
+
+    loadResumeData();
+  }, [id, auth.isAuthenticated, kv]);
+
+  // Process resume data when it's loaded
+  useEffect(() => {
+    const processResumeData = async () => {
+      if (!resumeData || !auth.isAuthenticated) return;
+
+      // Prevent re-processing if we already have the PDF URL
+      if (pdfUrl) return;
+
+      try {
+        console.log('Processing resume data:', resumeData);
+
+        // Load the PDF resume - using 'file' property instead of 'resumePath'
+        const pdfPath = resumeData.file || resumeData.resumePath;
+        console.log('Reading PDF from path:', pdfPath);
+
+        const resumeBlob = await fs.read(pdfPath);
+
+        if (!resumeBlob) {
+          console.error('Failed to read resume blob from path:', pdfPath);
+          return;
+        }
+
+        console.log('Resume blob loaded, size:', resumeBlob.size);
+
+        // Create URL for PDF viewing
+        const pdfBlobWithType = new Blob([resumeBlob], {
+          type: 'application/pdf',
+        });
+        const pdfObjectUrl = URL.createObjectURL(pdfBlobWithType);
+        setPdfUrl(pdfObjectUrl);
+        console.log('PDF URL created:', pdfObjectUrl);
+
+        // Check if feedback is stored directly in the data or in a separate file
+        if (resumeData.feedback) {
+          // Feedback is stored directly in the data
+          setFeedback(resumeData.feedback);
+          console.log('Feedback loaded from data:', resumeData.feedback);
+        } else if (resumeData.feedbackPath) {
+          // Feedback is in a separate file
+          console.log(
+            'Attempting to read feedback from path:',
+            resumeData.feedbackPath
+          );
+          const feedbackBlob = await fs.read(resumeData.feedbackPath);
+
+          if (!feedbackBlob) {
+            console.error(
+              'Failed to read feedback blob from path:',
+              resumeData.feedbackPath
+            );
+            return;
+          }
+
+          const feedbackText = await feedbackBlob.text();
+          const feedbackData = JSON.parse(feedbackText);
+          setFeedback(feedbackData);
+          console.log('Feedback loaded from file:', feedbackData);
+        } else {
+          console.error('No feedback found in data');
+        }
+      } catch (error) {
+        console.error('Error processing resume data:', error);
+      }
+    };
+
+    processResumeData();
+  }, [resumeData, auth.isAuthenticated, fs, pdfUrl]);
+
+  // Cleanup function to revoke object URLs
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
 
   return (
     <main className="main-section">
@@ -80,44 +149,42 @@ const Resume = () => {
         </Link>
       </nav>
       <div className="flex flex-row w-full max-lg:flex-col gap-4">
-        <section className="feedback-section bg-[url('/images/bg-small.svg') bg-cover h-[100vh] sticky top-0 items-center justify-center">
-          {imageUrl && resumeUrl ? (
-            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4">
-              <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
-                <img
-                  src={imageUrl}
-                  alt="Resume"
-                  className="w-full h-full object-contain rounded-2xl"
-                  title="Resume"
-                />
-              </a>
-            </div>
-          ) : (
+        <section className="feedback-section bg-[url('/images/bg-small.svg')] bg-cover h-[100vh] sticky top-0 items-center justify-center">
+          {dataLoading || !pdfUrl ? (
             <div className="flex items-center justify-center">
               <img
                 src="/assets/images/bouncing-circles.svg"
                 alt="loading"
                 className="w-20 h-20"
+              />
+            </div>
+          ) : (
+            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4">
+              <iframe
+                src={pdfUrl}
+                title="Resume PDF"
+                className="w-full h-full rounded-2xl"
+                style={{ border: 'none' }}
               />
             </div>
           )}
         </section>
         <section className="feedback-section">
           <h2 className="text-3xl font-semibold text-center">Resume Review</h2>
-          {feedback ? (
-            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4">
-              <Summary feedback={feedback} />
-              <ATS
-                score={feedback.ATS.score || 0}
-                suggestions={feedback.ATS.tips || []}
-              />
-            </div>
-          ) : (
+          {dataLoading || !feedback ? (
             <div className="flex items-center justify-center">
               <img
                 src="/assets/images/bouncing-circles.svg"
                 alt="loading"
                 className="w-20 h-20"
+              />
+            </div>
+          ) : (
+            <div className="animate-in fade-in duration-500 gradient-border max-sm:m-0 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4 overflow-y-auto">
+              <Summary feedback={feedback} />
+              <ATS
+                score={feedback.ATS.score || 0}
+                suggestions={feedback.ATS.tips || []}
               />
             </div>
           )}
