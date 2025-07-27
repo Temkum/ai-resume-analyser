@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 const Navbar = () => {
+  const location = useLocation();
+
   return (
     <nav className="bg-gray-800 text-white p-4 flex">
       <div className="flex-1">
@@ -10,9 +11,11 @@ const Navbar = () => {
         </Link>
       </div>
       <div className="flex-1 text-right">
-        <Link to="/upload" className="text-lg font-bold ml-4 primary-button">
-          Upload Resume
-        </Link>
+        {location.pathname !== '/upload' && (
+          <Link to="/upload" className="text-lg font-bold ml-4 primary-button">
+            Upload Resume
+          </Link>
+        )}
       </div>
     </nav>
   );

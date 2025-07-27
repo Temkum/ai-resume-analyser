@@ -41,7 +41,7 @@ export default function Home() {
       try {
         setLoadingResumes(true);
         // Get all resume keys
-        const resumeKeys = await kv.list('resume-*', false);
+        const resumeKeys = await kv.list('resume-*', true);
 
         if (resumeKeys && resumeKeys.length > 0) {
           // Fetch all resume data
@@ -149,8 +149,8 @@ export default function Home() {
                 </p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => navigate(`/results?id=${resume.id}`)}
-                    className="text-blue-500 hover:text-blue-700 font-medium"
+                    onClick={() => navigate(`/resume/${resume.id}`)}
+                    className="primary-button"
                   >
                     View Analysis
                   </button>
@@ -159,7 +159,7 @@ export default function Home() {
                       href={resume.file}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-gray-700"
+                      className="primary-button text-center"
                     >
                       View PDF
                     </a>
