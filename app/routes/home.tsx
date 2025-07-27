@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { Route } from './+types/home';
-import Navbar from '~/components/Navbar';
-import { usePuterStore } from '~/lib/puter';
+import Navbar from '../components/Navbar';
+import { usePuterStore } from '../lib/puter';
 interface Resume {
   id: string;
   imagePath: string;
@@ -47,7 +47,9 @@ export default function Home() {
           // Fetch all resume data
           const resumePromises = resumeKeys.map(
             async (key: string | KVItem) => {
-              const data = await kv.get(key);
+              const data = await kv.get(
+                typeof key === 'string' ? key : key.key
+              );
               return data ? JSON.parse(data) : null;
             }
           );
