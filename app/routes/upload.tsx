@@ -75,7 +75,6 @@ const upload = () => {
       if (!feedback) {
         throw new Error('Failed to analyze resume');
       }
-      console.log(feedback);
 
       const feedbackText =
         typeof feedback.message.content === 'string'
@@ -88,7 +87,7 @@ const upload = () => {
 
       setStatusText('Analysis complete! Check your results.');
       console.log('Analysis complete! Check your results.', data);
-      // navigate('/results');
+      navigate(`/resume/${uuid}`);
     } catch (error) {
       console.error('Error during analysis:', error);
       setIsProcessing(false);
@@ -117,8 +116,6 @@ const upload = () => {
     const companyName = formData.get('company-name') as string;
     const jobTitle = formData.get('job-title') as string;
     const jobDescription = formData.get('job-description') as string;
-
-    console.log({ file, companyName, jobTitle, jobDescription });
 
     await handleAnalyze({
       file,
