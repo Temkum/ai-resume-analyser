@@ -4,11 +4,13 @@ import ScoreBadge from './ScoreBadge';
 
 const Category = ({ title, score }: { title: string; score: number }) => {
   const textColor =
-    score >= 80
-      ? 'text-green-500'
-      : score >= 50
+    score < 30
+      ? 'text-red-500'
+      : score >= 30 && score < 45
       ? 'text-yellow-500'
-      : 'text-red-500';
+      : score >= 45 && score < 70
+      ? '#ccff33'
+      : 'text-green-600';
 
   return (
     <div className="resume-summary flex flex-col gap-2">

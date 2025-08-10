@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { usePuterStore } from '~/lib/puter';
 import type { Route } from '../+types/root';
@@ -20,10 +20,9 @@ const Auth = () => {
 
   // Parse the 'next' parameter more safely
   const searchParams = new URLSearchParams(location.search);
-  const next = searchParams.get('next') || '/home';
+  const next = searchParams.get('next') || '/';
 
   useEffect(() => {
-    // Initialize Puter if not already done
     init();
   }, [init]);
 

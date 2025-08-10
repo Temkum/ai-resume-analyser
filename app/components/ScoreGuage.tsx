@@ -12,6 +12,21 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
     }
   }, []);
 
+  // Determine gradient colors based on score
+  let startColor = '#A7F3D0'; // default light green
+  let endColor = '#059669'; // default dark green
+
+  if (score < 45) {
+    startColor = '#ef4444'; // red
+    endColor = '#facc15'; // yellow-green
+  } else if (score >= 45 && score < 70) {
+    startColor = '#bbf7d0'; // light green
+    endColor = '#86efac'; // softer green
+  } else {
+    startColor = '#A7F3D0'; // light green
+    endColor = '#059669'; // dark green
+  }
+
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-40 h-20">
@@ -24,8 +39,8 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
               x2="100%"
               y2="0%"
             >
-              <stop offset="0%" stopColor="#a78bfa" />
-              <stop offset="100%" stopColor="#fca5a5" />
+              <stop offset="0%" stopColor={startColor} />
+              <stop offset="100%" stopColor={endColor} />
             </linearGradient>
           </defs>
 
@@ -38,7 +53,7 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
             strokeLinecap="round"
           />
 
-          {/* Foreground arc with rounded ends */}
+          {/* Foreground arc */}
           <path
             ref={pathRef}
             d="M10,50 A40,40 0 0,1 90,50"

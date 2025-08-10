@@ -40,10 +40,8 @@ const Resume = () => {
       try {
         setDataLoading(true);
         const key = `resume-${id}`;
-        console.log('Fetching resume data for key:', key);
 
         const data = await kv.get(key);
-        console.log('Resume data retrieved:', data);
 
         if (!data) {
           console.error('No resume data found for id:', id);
@@ -72,11 +70,8 @@ const Resume = () => {
       if (pdfUrl) return;
 
       try {
-        console.log('Processing resume data:', resumeData);
-
         // Load the PDF resume - using 'file' property instead of 'resumePath'
         const pdfPath = resumeData.file || resumeData.resumePath;
-        console.log('Reading PDF from path:', pdfPath);
 
         const resumeBlob = await fs.read(pdfPath);
 
@@ -85,27 +80,19 @@ const Resume = () => {
           return;
         }
 
-        console.log('Resume blob loaded, size:', resumeBlob.size);
-
         // Create URL for PDF viewing
         const pdfBlobWithType = new Blob([resumeBlob], {
           type: 'application/pdf',
         });
         const pdfObjectUrl = URL.createObjectURL(pdfBlobWithType);
         setPdfUrl(pdfObjectUrl);
-        console.log('PDF URL created:', pdfObjectUrl);
 
         // Check if feedback is stored directly in the data or in a separate file
         if (resumeData.feedback) {
           // Feedback is stored directly in the data
           setFeedback(resumeData.feedback);
-          console.log('Feedback loaded from data:', resumeData.feedback);
         } else if (resumeData.feedbackPath) {
           // Feedback is in a separate file
-          console.log(
-            'Attempting to read feedback from path:',
-            resumeData.feedbackPath
-          );
           const feedbackBlob = await fs.read(resumeData.feedbackPath);
 
           if (!feedbackBlob) {
@@ -119,7 +106,6 @@ const Resume = () => {
           const feedbackText = await feedbackBlob.text();
           const feedbackData = JSON.parse(feedbackText);
           setFeedback(feedbackData);
-          console.log('Feedback loaded from file:', feedbackData);
         } else {
           console.error('No feedback found in data');
         }

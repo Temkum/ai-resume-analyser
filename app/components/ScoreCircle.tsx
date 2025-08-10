@@ -6,6 +6,21 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
   const progress = score / 100;
   const strokeDashoffset = circumference * (1 - progress);
 
+  // Dynamic gradient colors based on score
+  let startColor = '#A7F3D0'; // default light green
+  let endColor = '#059669'; // default dark green
+
+  if (score < 45) {
+    startColor = '#ef4444'; // red
+    endColor = '#facc15'; // yellow-green
+  } else if (score >= 45 && score < 70) {
+    startColor = '#bbf7d0'; // light green
+    endColor = '#86efac'; // softer green
+  } else {
+    startColor = '#A7F3D0'; // light green
+    endColor = '#059669'; // dark green
+  }
+
   return (
     <div className="relative w-[100px] h-[100px]">
       <svg
@@ -23,11 +38,12 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
           strokeWidth={stroke}
           fill="transparent"
         />
-        {/* Partial circle with gradient */}
+
+        {/* Partial circle with dynamic gradient */}
         <defs>
           <linearGradient id="grad" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#FF97AD" />
-            <stop offset="100%" stopColor="#5171FF" />
+            <stop offset="0%" stopColor={startColor} />
+            <stop offset="100%" stopColor={endColor} />
           </linearGradient>
         </defs>
         <circle
@@ -43,7 +59,7 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
         />
       </svg>
 
-      {/* Score and issues */}
+      {/* Score in center */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-semibold text-sm">{`${score}/100`}</span>
       </div>

@@ -108,7 +108,7 @@ export default function Home() {
 
           <button
             onClick={() => navigate('/upload')}
-            className="primary-button"
+            className="primary-button w-auto"
           >
             Upload New Resume
           </button>

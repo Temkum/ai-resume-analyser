@@ -3,12 +3,11 @@ import FileUploader from '~/components/FileUploader';
 import Navbar from '~/components/Navbar';
 import { usePuterStore } from '~/lib/puter';
 import { useNavigate } from 'react-router';
-import { convertPdfToImage } from '~/lib/pdfToImage';
 import { generateUUID } from 'utilities/format-size';
 import { AIResponseFormat, prepareInstructions } from 'utilities/data';
 
 const upload = () => {
-  const { auth, isLoading, fs, ai, kv } = usePuterStore();
+  const { fs, ai, kv } = usePuterStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [statusText, setStatusText] = React.useState('');
@@ -86,7 +85,6 @@ const upload = () => {
       setIsProcessing(false);
 
       setStatusText('Analysis complete! Check your results.');
-      console.log('Analysis complete! Check your results.', data);
       navigate(`/resume/${uuid}`);
     } catch (error) {
       console.error('Error during analysis:', error);
@@ -195,11 +193,11 @@ const upload = () => {
               </div>
               <div className="form-div">
                 <label htmlFor="resume-upload" className="block mb-2">
-                  Upload your resume (PDF, DOC, DOCX):
+                  Upload your resume <strong>(PDF Only)</strong>:
                 </label>
                 <FileUploader onFileSelect={handleFileSelect} />
               </div>
-              <button type="submit" className="primary-button">
+              <button type="submit" className="primary-button bg-blue-700">
                 Analyze Resume
               </button>
             </form>
@@ -213,8 +211,8 @@ const upload = () => {
             re-upload your resume for further analysis.
           </p>
           <p className="text-lg mb-6">
-            We support various formats including PDF, DOC, and DOCX. Make sure
-            your resume is well-formatted and clear for the best results.
+            We support only PDF formats. Make sure your resume is well-formatted
+            and clear for the best results.
           </p>
         </div>
         <div className="faq-section">
@@ -223,8 +221,9 @@ const upload = () => {
           </h2>
           <ul className="faq-list">
             <li className="mb-4">
-              <strong>What formats do you support?</strong> We support PDF, DOC,
-              and DOCX formats for resume uploads.
+              <strong>What formats do you support?</strong> We support only PDF
+              at the moment. We plan to add support for DOC, and DOCX formats
+              for resume uploads.
             </li>
             <li className="mb-4">
               <strong>How long does it take to get feedback?</strong> Typically,

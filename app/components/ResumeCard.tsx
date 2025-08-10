@@ -29,7 +29,6 @@ const ResumeCard = ({
         // If imagePath exists and it's not the same as the PDF path, try to load it
         if (imagePath && !imagePath.endsWith('.pdf')) {
           const blob = await fs.read(imagePath);
-          console.log('Thumbnail blob:', blob);
           if (blob) {
             const url = URL.createObjectURL(blob);
             setThumbnailUrl(url);
